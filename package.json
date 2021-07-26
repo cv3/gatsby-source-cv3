@@ -1,7 +1,7 @@
 {
-  "name": "gatsby-starter-plugin",
-  "version": "1.0.0",
-  "description": "A minimal boilerplate for the essential files Gatsby looks for in a plugin",
+  "name": "gatsby-source-cv3",
+  "version": "0.0.1",
+  "description": "Use data from CommerceV3 in your Gatsby projects",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,8 +9,15 @@
   },
   "keywords": [
     "gatsby",
-    "gatsby-plugin"
+    "gatsby-plugin",
+    "CV3",
+    "CommerceV3",
+    "ecommerce"
   ],
-  "author": "Kyle Gill <kyle.robert.gill@gmail.com>",
-  "license": "0BSD"
+  "author": "Blake Ellis<blake@commercev3.com",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "qs": "^6.10.1"
+  }
 }
