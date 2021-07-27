@@ -35,7 +35,7 @@ exports.sourceNodes = async (
       parent: null,
       children: [],
       internal: {
-        type: 'Product',
+        type: 'CV3Product',
         content: JSON.stringify(product),
         contentDigest: createContentDigest(product),
       },
@@ -50,7 +50,7 @@ exports.sourceNodes = async (
       parent: null,
       children: [],
       internal: {
-        type: 'Category',
+        type: 'CV3Category',
         content: JSON.stringify(category),
         contentDigest: createContentDigest(category),
       },
