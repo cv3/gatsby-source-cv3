@@ -16,7 +16,13 @@ exports.getCategories = async ({ token_categories }) => {
       data: {
         data: {
           exportCategories: {
-            top_level_only: false,
+            // top_level_only: false,
+            // above doesn't work, need below but checking with support,
+            // docs don't seem to be right here.
+            export_by_range: {
+              start: 1,
+              limit: 1000,
+            },
           },
         },
       },
