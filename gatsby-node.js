@@ -54,21 +54,25 @@ exports.sourceNodes = async (
   const api_categories = await getCategories({ token_categories })
   console.log('CV3 Categories retrieved.')
 
-  // create a single CV3 parent node, anything we want to
-  // pull to put here? store name? global vars?
-  // const cv3RootNode = { id: 'CV3ParentNode', global_content: null }
-  // createNode({
-  //   id: createNodeId(cv3RootNode.id),
-  //   parent: null,
-  //   children: [],
-  //   internal: {
-  //     type: 'CV3',
-  //     content: JSON.stringify(cv3RootNode),
-  //     contentDigest: createContentDigest(cv3RootNode),
-  //   },
-  // })
+  // first let's create one top CV3 element with everything in it
+  let cv3all = {
+    products: api_products.data.exportProducts.products,
+    categories: api_categories.data.exportCategories,
+  }
 
-  // create product nodes
+  createNode({
+    ...cv3all,
+    id: createNodeId(`commercev3`),
+    parent: null,
+    children: [],
+    internal: {
+      type: 'commercev3',
+      content: JSON.stringify(cv3all),
+      contentDigest: createContentDigest(cv3all),
+    },
+  })
+
+  // now let's create individual elements for Products, Categoires, etc.
   api_products.data.exportProducts.products.forEach((product) => {
     product = camelcaseKeys(product, { deep: true })
     createNode({
@@ -77,14 +81,13 @@ exports.sourceNodes = async (
       parent: null,
       children: [],
       internal: {
-        type: 'CV3Products',
+        type: 'commercev3Products',
         content: JSON.stringify(product),
         contentDigest: createContentDigest(product),
       },
     })
   })
 
-  // create category nodes
   api_categories.data.exportCategories.forEach((category) =>
     createNode({
       ...category,
@@ -93,7 +96,7 @@ exports.sourceNodes = async (
       parent: null,
       children: [],
       internal: {
-        type: 'CV3Categories',
+        type: 'commercev3Categories',
         content: JSON.stringify(category),
         contentDigest: createContentDigest(category),
       },
