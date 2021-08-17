@@ -1,5 +1,4 @@
 var axios = require('axios')
-var qs = require('qs')
 
 // Step One: Use OAuth to get a token for use with the API endpoint
 // TODO: Runs every time, change to only run if we don't already have
@@ -16,7 +15,7 @@ exports.getCategories = async ({ token_categories }) => {
       data: {
         data: {
           exportCategories: {
-            top_level_only: false,
+            top_level_only: true,
             // above doesn't work, need below but checking with support,
             // docs don't seem to be right here.
             export_by_range: {

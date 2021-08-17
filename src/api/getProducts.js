@@ -1,5 +1,4 @@
 var axios = require('axios')
-var qs = require('qs')
 
 // CV3 product's export_by_range includes sub-products,
 // so first we want to just request SKUs... we'll get the
@@ -34,7 +33,7 @@ exports.getSKUs = async ({ token_products }) => {
   return api_result
 }
 
-exports.getProducts = async ({ token_products, skus }) => {
+exports.getProducts = async ({ token_products }) => {
   try {
     api_result = await axios.request({
       baseURL: 'https://service.commercev3.com/rest',
@@ -46,7 +45,9 @@ exports.getProducts = async ({ token_products, skus }) => {
       data: {
         data: {
           exportProducts: {
-            export_by_skus: skus,
+            export_by_range: {
+              start: 1,
+            },
           },
         },
       },
