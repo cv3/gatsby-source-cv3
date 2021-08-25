@@ -9,6 +9,7 @@ type CV3__Product implements Node {
 type CV3__Category implements Node {
   id: ID!
   name: String!
+  subCategories: [CV3__Category] @link
   productIDs: [ID]
   products: [CV3__Product] @link
 }`

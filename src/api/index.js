@@ -73,6 +73,15 @@ exports.getData = async (
       parentNodeID = parentNode.id
     }
 
+    // create ids for any subcategories
+    subCatIDs = []
+    if ('subCategories' in category) {
+      category.subCategories.forEach((subCat) => {
+        scid = createNodeId(`category-${subCat.id}`)
+        subCatIDs.push(scid)
+      })
+    }
+
     // make the products array, it comes in as SKU numbers
     // but we need prod_id to match the Gatsby IDs.
     // TODO: this is crazy expensive I would think, because
@@ -96,6 +105,7 @@ exports.getData = async (
       parentID: parentNodeID,
       productIDs: catProdIDs,
       products: catProdIDs,
+      subCategories: subCatIDs,
       internal: {
         type: 'Category',
       },
