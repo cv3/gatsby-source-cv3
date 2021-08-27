@@ -24,26 +24,39 @@ exports.getData = async (
   const api_categories = await getCategories({ token_categories })
 
   // Add Product Nodes
-  api_products.data.exportProducts.products.forEach((product) => {
+  api_products.data.exportProducts.products.forEach((rawProduct) => {
+    // snakeCase this node
+    var product = camelcaseKeys(rawProduct, { deep: true })
+
+    // clean up sub-products
+    newSubPs = []
+    if ('subProducts.subProducts' in product) {
+      product.subProducts.subProducts.forEach((subP) => {
+        var newSubP = {
+          ...subP,
+          cv3ID: subP.prodId,
+          imageLink: subP.image.link,
+        }
+        newSubPs.push(newSubP)
+      })
+      product.subProducts.subProducts = {}
+      product.subProducts.subProducts = newSubPs
+    }
+
     // create schema
     var catIds = []
-    product.categories.category_ids.map(function (e) {
+    product.categories.categoryIds.map(function (e) {
       nid = createNodeId(`category-${e}`)
       catIds.push(nid)
     })
     var productObj = {
-      id: createNodeId(`product-${product.prod_id}`),
+      ...product,
+      id: createNodeId(`product-${product.prodId}`),
+      cv3ID: product.prodId,
       sku: product.sku,
       name: product.name,
       categoryIDs: catIds,
       categories: catIds,
-    }
-
-    if (
-      'includeRawAPI' in pluginOptions &&
-      pluginOptions.includeRawAPI == true
-    ) {
-      productObj['raw'] = product
     }
 
     // add product to root object
@@ -82,10 +95,7 @@ exports.getData = async (
       })
     }
 
-    // make the products array, it comes in as SKU numbers
-    // but we need prod_id to match the Gatsby IDs.
-    // TODO: this is crazy expensive I would think, because
-    //       two loops through all products. Refactor!
+    // make the products array
     catProdIDs = []
     category.products.skus.forEach((sku) => {
       rootObj.products.forEach((product) => {
@@ -96,26 +106,52 @@ exports.getData = async (
       })
     })
 
+    // make the featured products array
+    featuredProdIDs = []
+    category.featuredProducts.skus.forEach((sku) => {
+      rootObj.products.forEach((product) => {
+        if (sku == product.sku) {
+          nid = product.id
+          featuredProdIDs.push(nid)
+        }
+      })
+    })
+
+    // custom fields is a large object from the api, returning
+    // here as a simple array. Need to test ease of use vs. schema
+    customFields = []
+    if ('customFields' in category) {
+      for (let [key, value] of Object.entries(category.customFields)) {
+        customFields.push(value)
+      }
+    }
+
+    relCats = []
+    if ('relatedCategories' in category) {
+      category.relatedCategories.forEach((catId) => {
+        rcid = createNodeId(`category-${catId}`)
+        relCats.push(rcid)
+      })
+    }
+
     // create node data
     nodeID = createNodeId(`category-${category.id}`)
 
     var obj = {
+      ...category,
       id: nodeID,
+      cv3ID: category.id,
       name: category.name,
       parentID: parentNodeID,
       productIDs: catProdIDs,
       products: catProdIDs,
+      featuredProducts: featuredProdIDs,
       subCategories: subCatIDs,
+      customFields: customFields,
+      relatedCategories: relCats,
       internal: {
         type: 'Category',
       },
-    }
-
-    if (
-      'includeRawAPI' in pluginOptions &&
-      pluginOptions.includeRawAPI == true
-    ) {
-      obj['raw'] = category
     }
 
     // create node
