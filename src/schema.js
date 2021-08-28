@@ -1,14 +1,3 @@
-// TODO:
-// Categories: custom fields is an array instead of an object
-// Categories: test with larger data set
-// Categories: check for any other missing fields since we @dontInfer
-// Categories: add date?
-// Products: add wholesale_prices if this is not depreciated?
-// Products: add shipping, taxes, rewards, dependency products, dependency prods,
-//           gift certificate,  third_party_customization, attributes nodes on prods & subProds
-// Products: for sub-products, can we flatten and not need "active" node?
-// Products: sub-product image node
-
 exports.customTypes = `
 type CV3__Category implements Node @dontInfer {
   id: ID!
@@ -76,7 +65,7 @@ type CV3__SubProduct {
   outOfSeason: Boolean
   googleCheckoutExempt: Boolean
   isDonation: Boolean
-  cv3ID: Int!
+  cv3ID: Int
   prodId: Int!
   sku: String!
   name: String!

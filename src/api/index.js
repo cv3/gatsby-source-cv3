@@ -4,33 +4,41 @@ const { doAuth } = require('./auth')
 const { getProducts } = require('./getProducts')
 const { getCategories } = require('./getCategories')
 
-exports.getData = async (
-  { createContentDigest, createNodeId },
-  pluginOptions
-) => {
-  // set up root object
+exports.getData = async ({ createNodeId }, pluginOptions) => {
+  // create a root object to hold all the JSON data. We don't
+  // create any GraphQL nodes here, we simply collect all the
+  // data into this root object. During collection we can
+  // clean and rearrange the data as needed.
+  //
+  // Of particular note are ID fields. We move all CV3 IDs into
+  // 'cv3ID' fiels so that we can use 'id' fields for Gatsby
+  // generated unique node ids. We create the Gatsby ids from
+  // the cv3ID values. This is important for cross linking
+  // products and categories, nesting categories, related
+  // products, related categories, etc.
   var rootObj = {}
   rootObj.products = []
   rootObj.categories = []
 
-  // products
+  // get product data from the CV3 REST API
   var scope = 'products'
-  const token_products = await doAuth({ pluginOptions, scope }) // auth
+  const token_products = await doAuth({ pluginOptions, scope })
   const api_products = await getProducts({ token_products })
 
-  // categories
+  // get category data from the CV3 REST API
   scope = 'categories'
   const token_categories = await doAuth({ pluginOptions, scope })
   const api_categories = await getCategories({ token_categories })
 
-  // Add Product Nodes
+  // Loop through all the products returned, snakeCase the field
+  // names, clean things up and (most importantly) create all the
+  // necessary Gatsby Node IDs required for cross-linking nodes.
   api_products.data.exportProducts.products.forEach((rawProduct) => {
-    // snakeCase this node
     var product = camelcaseKeys(rawProduct, { deep: true })
 
-    // clean up sub-products
+    // clean up subProducts
     newSubPs = []
-    if ('subProducts.subProducts' in product) {
+    if ('subProducts' in product) {
       product.subProducts.subProducts.forEach((subP) => {
         var newSubP = {
           ...subP,
@@ -39,45 +47,52 @@ exports.getData = async (
         }
         newSubPs.push(newSubP)
       })
-      product.subProducts.subProducts = {}
       product.subProducts.subProducts = newSubPs
     }
 
-    // create schema
+    // create Gatsby node ids for the product's categories
     var catIds = []
     product.categories.categoryIds.map(function (e) {
       nid = createNodeId(`category-${e}`)
       catIds.push(nid)
     })
+
+    // build our final product object
     var productObj = {
       ...product,
       id: createNodeId(`product-${product.prodId}`),
       cv3ID: product.prodId,
-      sku: product.sku,
-      name: product.name,
-      categoryIDs: catIds,
       categories: catIds,
+      categoryIDs: catIds, // will consumers want this array?
     }
 
     // add product to root object
     rootObj.products.push(productObj)
   })
 
-  // add category nodes
-  var catObj = {
+  // Loop through categories to do the same things we did above
+  // for products. It's a bit more complicated because categories
+  // are nested to some unknown degree. So we run everything through
+  // a recursive function, passing in the category and a parent.
+  // For top-level categories we need a null parent object.
+  var topLevelParent = {
     parentID: null,
     id: null,
     name: null,
   }
+
+  // for each top-level category, call the function with our
+  // null parent object. SubCategories are embedded in the top-level
+  // category objects, so if there are any, they'll trigger calls
+  // to the same function.
   api_categories.data.exportCategories.forEach((category) => {
-    recursiveCategories(category, catObj) // call recursive categories function
+    recursiveCategories(category, topLevelParent)
   })
 
-  // recursiveCategories() is a recursive function
-  // that will continue to create category nodes
-  // as deep as they may go.
+  // recursiveCategories() is a function that will continue to create
+  // category objects as deep as they may go.
   function recursiveCategories(category, parentNode) {
-    // snakeCase this node
+    // we only snakeCase one level at a time instead of all of them at once
     category = camelcaseKeys(category)
 
     // if parent, get the id
@@ -86,7 +101,7 @@ exports.getData = async (
       parentNodeID = parentNode.id
     }
 
-    // create ids for any subcategories
+    // create Gatsby ids for any subcategories
     subCatIDs = []
     if ('subCategories' in category) {
       category.subCategories.forEach((subCat) => {
@@ -95,7 +110,11 @@ exports.getData = async (
       })
     }
 
-    // make the products array
+    // get Gasby IDs for all products in this
+    // category. Unfortunately, we have SKUs, not
+    // the internal CV3 IDs we need to create the right
+    // Gatsby IDs, so we need to match on the products
+    // we already added above to the rootObject.
     catProdIDs = []
     category.products.skus.forEach((sku) => {
       rootObj.products.forEach((product) => {
@@ -106,7 +125,7 @@ exports.getData = async (
       })
     })
 
-    // make the featured products array
+    // same with featured products
     featuredProdIDs = []
     category.featuredProducts.skus.forEach((sku) => {
       rootObj.products.forEach((product) => {
@@ -126,6 +145,7 @@ exports.getData = async (
       }
     }
 
+    // create Gatsby IDs for linking relatedCategories
     relCats = []
     if ('relatedCategories' in category) {
       category.relatedCategories.forEach((catId) => {
@@ -134,7 +154,7 @@ exports.getData = async (
       })
     }
 
-    // create node data
+    // build our final category object
     nodeID = createNodeId(`category-${category.id}`)
 
     var obj = {
@@ -154,18 +174,18 @@ exports.getData = async (
       },
     }
 
-    // create node
-
+    // add to our root object
     rootObj.categories.push(obj)
 
     // if we have more subcategories, recurse
     if ('subCategories' in category) {
       category.subCategories.forEach((subCat) => {
-        // new nodeMeta
         recursiveCategories(subCat, obj)
       })
     }
   }
 
+  // finally, return our Root object with all the hard work done
+  // so the calling code can easily create the nodes it wants.
   return rootObj
 }

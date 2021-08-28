@@ -1,14 +1,14 @@
 // include code
-const { customTypes } = require('./src/schema/customizations')
+const { customTypes } = require('./src/schema.js')
 const { getData } = require('./src/api')
 
-// our schema & customizations from REST to GraphQL
+// schema
 exports.createSchemaCustomization = ({ actions }) => {
   const { createTypes } = actions
   createTypes(customTypes)
 }
 
-// our node creation
+// node creation
 exports.sourceNodes = async (
   { actions, createContentDigest, createNodeId },
   pluginOptions
