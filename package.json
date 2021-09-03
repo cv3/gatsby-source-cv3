@@ -1,6 +1,6 @@
 {
   "name": "gatsby-source-cv3",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Use data from CV3 (CommerceV3) in your Gatsby projects",
   "main": "index.js",
   "scripts": {
