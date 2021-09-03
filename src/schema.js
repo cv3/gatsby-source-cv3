@@ -1,6 +1,7 @@
 exports.customTypes = `
 type CV3__Category implements Node @dontInfer {
   id: ID!
+  parentCategory: CV3__Category @link
   cv3ID: Int
   name: String!
   subCategories: [CV3__Category] @link

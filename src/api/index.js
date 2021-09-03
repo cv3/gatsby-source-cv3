@@ -96,10 +96,10 @@ exports.getData = async ({ createNodeId }, pluginOptions) => {
     category = camelcaseKeys(category)
 
     // if parent, get the id
-    parentNodeID = null
-    if (parentNode.id != null) {
-      parentNodeID = parentNode.id
-    }
+    // parentNodeID = null
+    // if (parentNode.id != null) {
+    //   parentNodeID = parentNode.id
+    // }
 
     // create Gatsby ids for any subcategories
     subCatIDs = []
@@ -162,7 +162,7 @@ exports.getData = async ({ createNodeId }, pluginOptions) => {
       id: nodeID,
       cv3ID: category.id,
       name: category.name,
-      parentID: parentNodeID,
+      parentCategory: parentNode.id,
       productIDs: catProdIDs,
       products: catProdIDs,
       featuredProducts: featuredProdIDs,
