@@ -2,6 +2,42 @@
 const { customTypes } = require('./src/schema.js')
 const { getData } = require('./src/api')
 
+
+
+
+const { createRemoteFileNode } = require(`gatsby-source-filesystem`)
+
+// called each time a node is created
+exports.onCreateNode = async ({
+  node, // the node that was just created
+  actions: { createNode, createNodeField },
+  createNodeId,
+  getCache,
+}) => {
+  if (node.internal.type === "CV3__Product") {
+    const fileNode = await createRemoteFileNode({
+      // the url of the remote image to generate a node for
+      url: "https://s3.amazonaws.com/cdn.shopsavannah.net"+node.images.imageLinks[0].popup,
+      parentNodeId: node.id,
+      createNode,
+      createNodeId,
+      getCache,
+    })
+
+    if (fileNode) {
+      // node.remoteImage___NODE = fileNode.id
+      // node.remoteImage = fileNode.id
+      createNodeField({ node, name: 'remoteImage', value: fileNode.id })
+      console.log({node})
+    }
+  }
+}
+
+
+
+
+
+
 // schema
 exports.createSchemaCustomization = ({ actions }) => {
   const { createTypes } = actions

@@ -54,6 +54,7 @@ type CV3__Product implements Node @dontInfer {
   recurringEligible: Boolean
   subProducts: CV3__SubProducts
   dateCreated: Date
+  remoteImage: File @link(from: "fields.remoteImage")
 }
 
 type CV3__SubProducts {
