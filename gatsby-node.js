@@ -1,11 +1,7 @@
 // include code
 const { customTypes } = require('./src/schema.js')
 const { getData } = require('./src/api')
-
-
-
-
-const { createRemoteFileNode } = require(`gatsby-source-filesystem`)
+const { createRemoteFileNode } = require('gatsby-source-filesystem')
 
 // called each time a node is created
 exports.onCreateNode = async ({
@@ -25,18 +21,10 @@ exports.onCreateNode = async ({
     })
 
     if (fileNode) {
-      // node.remoteImage___NODE = fileNode.id
-      // node.remoteImage = fileNode.id
       createNodeField({ node, name: 'remoteImage', value: fileNode.id })
-      console.log({node})
     }
   }
 }
-
-
-
-
-
 
 // schema
 exports.createSchemaCustomization = ({ actions }) => {
