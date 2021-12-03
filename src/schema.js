@@ -20,6 +20,8 @@ type CV3__Category implements Node @dontInfer {
   numProdsPerPage: Int
   categoryPath: String!
   customFields: [String]
+  images: CV3__CategoryImages
+  remoteImage: File @link(from: "fields.remoteImage")
 }
 
 type CV3__Product implements Node @dontInfer {
@@ -107,9 +109,20 @@ type CV3__Inventory {
   onOrder: Int
 }
 
+type CV3__CategoryImages {
+  replace_existing: Boolean
+  image_links: [CV3__CategoryImage]
+}
+
 type CV3__ProductImages {
   replaceExisting: Boolean
   imageLinks: [CV3__ProductImage]
+}
+
+type CV3__CategoryImage {
+  link: String
+  title: String
+  rank: Int
 }
 
 type CV3__ProductImage {

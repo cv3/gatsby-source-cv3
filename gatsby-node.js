@@ -1,7 +1,7 @@
 // include code
 const { customTypes } = require('./src/schema.js')
 const { getData } = require('./src/api')
-const { createRemoteFileNode } = require('gatsby-source-filesystem')
+const { createRemoteFileNode } = require(`gatsby-source-filesystem`)
 
 // called each time a node is created
 exports.onCreateNode = async ({
@@ -10,16 +10,31 @@ exports.onCreateNode = async ({
   createNodeId,
   getCache,
 }) => {
+  // console.log(JSON.stringify(node))
   if (node.internal.type === "CV3__Product") {
+    console.log("onCreateNode createRemoteFileNode for images (Product): "+node.name)
+    // console.log(JSON.stringify(node.images))
     const fileNode = await createRemoteFileNode({
-      // the url of the remote image to generate a node for
       url: "https://s3.amazonaws.com/cdn.shopsavannah.net"+node.images.imageLinks[0].popup,
       parentNodeId: node.id,
       createNode,
       createNodeId,
       getCache,
     })
-
+    if (fileNode) {
+      createNodeField({ node, name: 'remoteImage', value: fileNode.id })
+    }
+  } else if ((node.internal.type === "CV3__Category") && (node.images)) {
+    console.log("onCreateNode createRemoteFileNode for images (Category): "+node.name)
+    // console.log(JSON.stringify(node.images))
+    console.log(JSON.stringify(node))
+    const fileNode = await createRemoteFileNode({
+      url: "https://s3.amazonaws.com/cdn.shopsavannah.net"+node.images.image_links[0].link,
+      parentNodeId: node.id,
+      createNode,
+      createNodeId,
+      getCache,
+    })
     if (fileNode) {
       createNodeField({ node, name: 'remoteImage', value: fileNode.id })
     }
