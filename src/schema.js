@@ -21,7 +21,7 @@ type CV3__Category implements Node @dontInfer {
   categoryPath: String!
   customFields: [String]
   images: CV3__CategoryImages
-  remoteImage: File @link(from: "fields.remoteImage")
+  remoteImages: [File] @link(from: "fields.remoteImages")
 }
 
 type CV3__Product implements Node @dontInfer {
@@ -54,16 +54,44 @@ type CV3__Product implements Node @dontInfer {
   quantityRestrictions: CV3__QuantityRestrictions
   weight: CV3__Weight
   recurringEligible: Boolean
+  attributes: CV3__Attributes
   subProducts: CV3__SubProducts
   dateCreated: Date
-  remoteImage: File @link(from: "fields.remoteImage")
+  remoteImages: [File] @link(from: "fields.remoteImages")
+  remoteSubProductImages: [File] @link(from: "fields.remoteSubProductImages")
+}
+
+type CV3__Attributes {
+  active: Boolean
+  titles: [CV3__AttributeTitles]
+  attributes: [CV3__InnerAttributes]
+}
+type CV3__AttributeTitles {
+  column: String
+  title: String
+}
+type CV3__InnerAttributes {
+  status: String
+  isDonation: Boolean
+  sku: String
+  altId: String
+  combination: CV3__AttributeCombination
+  inventoryControl: CV3__Inventory
+  retailPrices: CV3__RetailPrices
+}
+
+type CV3__AttributeCombination {
+  values: [CV3__AttributeCombinations]
+}
+type CV3__AttributeCombinations {
+  column: Int
+  value: String
 }
 
 type CV3__SubProducts {
   active: Boolean
   subProducts: [CV3__SubProduct]
 }
-
 type CV3__SubProduct {
   inactive: Boolean
   outOfSeason: Boolean
