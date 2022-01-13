@@ -164,9 +164,17 @@ type CV3__ProductImage {
   link: String
 }
 
+type CV3__Special {
+  ongoing: Boolean
+  start: String
+  stop: String
+  text: String
+  allowFree: Boolean
+}
 type CV3__RetailPrices {
   prices: [CV3__Prices]
   active: Boolean
+  special: CV3__Special
 }
 
 type CV3__Prices {
